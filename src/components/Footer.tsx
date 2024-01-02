@@ -1,17 +1,18 @@
 import { Box, Text, View } from '@gluestack-ui/themed';
 import React from 'react';
-import { Appearance, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 
 const styles = StyleSheet.create({
   footer: {
-    backgroundColor:
-      Appearance.getColorScheme() === 'dark' ? '#121212' : '#fff',
-    borderColor: '#d9d9d9',
-    borderTopWidth: 1,
+    backgroundColor: '#121212',
     height: 60,
     width: '100%',
     position: 'absolute',
     bottom: 0,
+  },
+  text: {
+    color: '#FFFFFF',
+    fontSize: 16,
   },
 });
 
@@ -22,11 +23,12 @@ const Footer = () => {
         style={{
           paddingVertical: 10,
           flexDirection: 'row',
-          justifyContent: 'space-evenly',
+          justifyContent: 'center',
+          gap: 50,
         }}
       >
-        <Text>Home</Text>
-        <Text>More Quotes</Text>
+        <Text style={styles.text}>Home</Text>
+        <Text style={styles.text}>More</Text>
       </Box>
     </View>
   );
