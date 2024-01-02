@@ -13,7 +13,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'black',
+    backgroundColor: '#121212',
   },
   view: {
     flex: 1,
