@@ -1,23 +1,27 @@
+import { determineTimeOfDay } from '../../services/services';
 import { Quote } from '../../types/types';
 import BooksSection from './components/Books';
 import QuoteBox from './components/QuoteBox';
-import { Heading, ScrollView, Text, View } from '@gluestack-ui/themed';
+import { Heading, ScrollView, Spinner, Text, View } from '@gluestack-ui/themed';
+import { HeartIcon } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
-  Modal,
   PanResponder,
+  Pressable,
+  RefreshControl,
   StyleSheet,
-  TouchableOpacity,
 } from 'react-native';
 
 const Home = () => {
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<Error | null>(null);
+  const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
   const [quote, setQuote] = useState<Quote>({
     text: '',
     author: '',
   });
-
-  const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
 
   const panResponder = useRef(
     PanResponder.create({
@@ -36,65 +40,83 @@ const Home = () => {
     }),
   ).current;
 
-  const determineTimeOfDay = () => {
-    const date = new Date();
-    const hours = date.getHours();
-    let timeOfDay;
-    if (hours < 12) {
-      timeOfDay = 'Good Morning';
-    } else if (hours >= 12 && hours < 17) {
-      timeOfDay = 'Good Afternoon';
-    } else {
-      timeOfDay = 'Good Evening';
-    }
-    return timeOfDay;
-  };
-
-  const toggleFullScreen = () => {
-    setIsFullScreen(!isFullScreen);
-  };
-
-  useEffect(() => {
-    const fetchQuote = async () => {
+  const fetchQuote = async () => {
+    try {
+      setIsLoading(true);
       const response = await fetch('https://stoic-quotes.com/api/quote');
       const data = await response.json();
       setQuote(data);
-    };
-    fetchQuote();
+    } catch (error) {
+      setError(error as Error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    const interval = setInterval(fetchQuote, 24 * 60 * 60 * 1000);
-    return () => clearInterval(interval);
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchQuote().then(() => setRefreshing(false));
+  };
+
+  useEffect(() => {
+    fetchQuote();
   }, []);
 
-  return (
-    <ScrollView>
-      <View style={{ marginBottom: 10 }}>
+  return isLoading ? (
+    <View style={styles.centeredContainer}>
+      <Spinner size={'small'} />
+    </View>
+  ) : error ? (
+    <View style={styles.centeredContainer}>
+      <Text style={styles.error}>{error.message}</Text>
+    </View>
+  ) : (
+    <ScrollView
+      scrollEventThrottle={16}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          style={styles.refreshControl}
+        />
+      }
+    >
+      <View style={styles.container}>
         <Text style={styles.subHeading}>{determineTimeOfDay()}</Text>
-        <Heading style={styles.heading}>Think about this</Heading>
+        <Heading style={styles.heading}>Reflect on this</Heading>
       </View>
-      <Animated.View
-        style={isFullScreen && { opacity: 0.25 }}
+      <View
+        style={[styles.quoteBox, isFullScreen ? styles.fullScreen : null]}
         {...panResponder.panHandlers}
       >
         <QuoteBox
           quote={quote}
           isFullScreen={isFullScreen}
-          toggleFullScreen={toggleFullScreen}
+          setIsFullScreen={setIsFullScreen}
         />
-      </Animated.View>
-      <View style={{ marginTop: 10 }}>
-        <View style={{ marginBottom: 10 }}>
-          <Heading style={styles.heading}>Worth reading</Heading>
-        </View>
-        <View style={{ marginBottom: 10 }}>
-          <BooksSection />
-        </View>
+      </View>
+      <View style={styles.container}>
+        <BooksSection />
       </View>
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
+  refreshControl: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+  },
+  centeredContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  container: {
+    marginBottom: 10,
+    marginTop: 10,
+  },
   heading: {
     fontSize: 25,
     color: '#FFFFFF',
@@ -113,6 +135,9 @@ const styles = StyleSheet.create({
     padding: 25,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  error: {
+    color: '#FFFFFF',
   },
 });
 
