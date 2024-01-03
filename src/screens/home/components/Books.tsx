@@ -3,6 +3,7 @@ import {
   Box,
   Button,
   HStack,
+  Heading,
   Image,
   ScrollView,
   Text,
@@ -14,6 +15,7 @@ import {
   Modal,
   PanResponder,
   SafeAreaView,
+  StyleSheet,
   TouchableOpacity,
 } from 'react-native';
 
@@ -93,99 +95,112 @@ const BooksSection = () => {
   // ).current;
 
   return (
-    <ScrollView horizontal>
-      <HStack space="xl" reversed={false}>
-        {books.map((book: Book) => (
-          <TouchableOpacity
-            key={book.id}
-            style={{
-              width: 150,
-              height: 250,
-            }}
-            onPress={() => {
-              setIsFullScreen(true);
-              setChosenBook(book);
-            }}
-          >
-            <Image
-              alt="book"
-              source={{ uri: book.image }}
+    <View flex={1}>
+      <View style={{ marginBottom: 10 }}>
+        <Heading style={styles.heading}>Worth reading</Heading>
+      </View>
+      <ScrollView horizontal>
+        <HStack space="xl" reversed={false}>
+          {books.map((book: Book) => (
+            <TouchableOpacity
+              key={book.id}
               style={{
-                width: 'auto',
+                width: 150,
                 height: 250,
-                zIndex: 1,
               }}
-            />
-            <Text
-              style={{
-                position: 'absolute',
-                bottom: 0,
-                left: 0,
-                right: 0,
-                padding: 10,
-                backgroundColor: '#FFFFFF',
-                opacity: 0.9,
-                zIndex: 2,
-                fontSize: 12,
+              onPress={() => {
+                setIsFullScreen(true);
+                setChosenBook(book);
               }}
             >
-              {book.title.length > 30
-                ? `${book.title.slice(0, 30)}...`
-                : book.title}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </HStack>
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={isFullScreen}
-        onRequestClose={() => setIsFullScreen(false)}
-      >
-        <SafeAreaView>
-          <ScrollView
-            style={{
-              paddingHorizontal: 20,
-              backgroundColor: '#121212',
-              height: '100%',
-            }}
-            onScroll={(event) => {
-              const scrollPosition = event.nativeEvent.contentOffset.y;
-              if (scrollPosition < -50) {
-                setIsFullScreen(false);
-              }
-            }}
-            scrollEventThrottle={16}
-          >
-            <Image
-              alt={chosenBook?.title}
-              source={{ uri: chosenBook?.image }}
+              <Image
+                alt="book"
+                source={{ uri: book.image }}
+                style={{
+                  width: 'auto',
+                  height: 250,
+                  zIndex: 1,
+                }}
+              />
+              <Text
+                style={{
+                  position: 'absolute',
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  padding: 10,
+                  backgroundColor: '#FFFFFF',
+                  opacity: 0.9,
+                  zIndex: 2,
+                  fontSize: 12,
+                }}
+              >
+                {book.title.length > 30
+                  ? `${book.title.slice(0, 30)}...`
+                  : book.title}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </HStack>
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={isFullScreen}
+          onRequestClose={() => setIsFullScreen(false)}
+        >
+          <SafeAreaView>
+            <ScrollView
               style={{
-                width: '100%',
-                height: 500,
-                borderRadius: 10,
+                paddingHorizontal: 20,
+                backgroundColor: '#121212',
+                height: '100%',
               }}
-            />
-            <Text style={{ color: '#FFFFFF', marginTop: 5 }}>
-              {chosenBook?.title}
-            </Text>
-            <Text style={{ color: '#FFFFFF', marginTop: 10 }}>
-              "Letters from a Stoic" is a timeless collection of philosophical
-              letters penned by the ancient Roman philosopher Seneca to his
-              friend Lucilius. These letters serve as a practical guide to
-              living a virtuous and meaningful life, offering insights into the
-              core tenets of Stoicism. {'\n\n'}
-              Seneca, a prominent Stoic philosopher, delves into the fundamental
-              principles of Stoicism. This ancient philosophy advocates
-              cultivating wisdom, courage, justice, and temperance to achieve
-              tranquility in the face of life's challenges. Stoicism emphasizes
-              focusing on what is within our control and accepting what is not.
-            </Text>
-          </ScrollView>
-        </SafeAreaView>
-      </Modal>
-    </ScrollView>
+              onScroll={(event) => {
+                const scrollPosition = event.nativeEvent.contentOffset.y;
+                if (scrollPosition < -50) {
+                  setIsFullScreen(false);
+                }
+              }}
+              scrollEventThrottle={16}
+            >
+              <Image
+                alt={chosenBook?.title}
+                source={{ uri: chosenBook?.image }}
+                style={{
+                  width: '100%',
+                  height: 500,
+                  borderRadius: 10,
+                }}
+              />
+              <Text style={{ color: '#FFFFFF', marginTop: 5 }}>
+                {chosenBook?.title}
+              </Text>
+              <Text style={{ color: '#FFFFFF', marginTop: 10 }}>
+                "Letters from a Stoic" is a timeless collection of philosophical
+                letters penned by the ancient Roman philosopher Seneca to his
+                friend Lucilius. These letters serve as a practical guide to
+                living a virtuous and meaningful life, offering insights into
+                the core tenets of Stoicism. {'\n\n'}
+                Seneca, a prominent Stoic philosopher, delves into the
+                fundamental principles of Stoicism. This ancient philosophy
+                advocates cultivating wisdom, courage, justice, and temperance
+                to achieve tranquility in the face of life's challenges.
+                Stoicism emphasizes focusing on what is within our control and
+                accepting what is not.
+              </Text>
+            </ScrollView>
+          </SafeAreaView>
+        </Modal>
+      </ScrollView>
+    </View>
   );
 };
 
 export default BooksSection;
+
+const styles = StyleSheet.create({
+  heading: {
+    fontSize: 25,
+    color: '#FFFFFF',
+  },
+});
