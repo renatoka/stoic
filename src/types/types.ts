@@ -1,3 +1,6 @@
+import { Dispatch, SetStateAction } from 'react';
+import { PanResponderInstance } from 'react-native';
+
 export type Quote = {
   author: string;
   text: string;
@@ -6,7 +9,7 @@ export type Quote = {
 export type QuoteBoxProps = {
   quote: Quote;
   isFullScreen: boolean;
-  toggleFullScreen: () => void;
+  setIsFullScreen: any;
 };
 
 export type Book = {
