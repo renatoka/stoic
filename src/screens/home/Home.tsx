@@ -2,49 +2,44 @@ import { determineTimeOfDay } from '../../services/services';
 import { Quote } from '../../types/types';
 import BooksSection from './components/Books';
 import QuoteBox from './components/QuoteBox';
-import { Heading, ScrollView, Spinner, Text, View } from '@gluestack-ui/themed';
-import { HeartIcon } from 'lucide-react-native';
-import React, { useEffect, useRef, useState } from 'react';
-import {
-  Animated,
-  PanResponder,
-  Pressable,
-  RefreshControl,
-  StyleSheet,
-} from 'react-native';
+import { Heading, Spinner, Text, View } from '@gluestack-ui/themed';
+import React, { useEffect, useState } from 'react';
+import { RefreshControl, ScrollView, StyleSheet } from 'react-native';
+import { MMKVLoader } from 'react-native-mmkv-storage';
 
 const Home = () => {
+  const storage = new MMKVLoader()
+    .withInstanceID('favorites')
+    .withEncryption()
+    .initialize();
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
-  const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
   const [quote, setQuote] = useState<Quote>({
+    id: '',
     text: '',
     author: '',
   });
 
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: (evt, gestureState) => true,
-      onStartShouldSetPanResponderCapture: (evt, gestureState) => true,
-      onMoveShouldSetPanResponder: (evt, gestureState) => true,
-      onMoveShouldSetPanResponderCapture: (evt, gestureState) => true,
-      onPanResponderGrant: (evt, gestureState) => {
-        setIsFullScreen(true);
-      },
-      onPanResponderMove: (evt, gestureState) => {
-        if (gestureState.dy > 100) {
-          setIsFullScreen(false);
-        }
-      },
-    }),
-  ).current;
+  useEffect(() => {
+    fetchQuote();
+  }, []);
 
   const fetchQuote = async () => {
     try {
       setIsLoading(true);
       const response = await fetch('https://stoic-quotes.com/api/quote');
       const data = await response.json();
+      data.id = Math.floor(Math.random() * 1000000).toString();
+      const favorites = await storage.getArrayAsync('favorites');
+      if (favorites) {
+        const isFavorite = favorites.some(
+          (favorite: any) => favorite.id === data.id,
+        );
+        if (isFavorite) {
+          data.id = (parseInt(data.id) + 1).toString();
+        }
+      }
       setQuote(data);
     } catch (error) {
       setError(error as Error);
@@ -58,11 +53,26 @@ const Home = () => {
     await fetchQuote().then(() => setRefreshing(false));
   };
 
-  useEffect(() => {
-    fetchQuote();
-  }, []);
+  const addToFavorites = async () => {
+    const favorites = await storage.getArrayAsync('favorites');
+    if (favorites) {
+      await storage.setArrayAsync('favorites', [...favorites, quote]);
+    } else {
+      await storage.setArrayAsync('favorites', [quote]);
+    }
+  };
 
-  return isLoading ? (
+  const removeFromFavorites = async (id: string) => {
+    const favorites = await storage.getArrayAsync('favorites');
+    if (favorites) {
+      const filteredFavorites = favorites.filter(
+        (favorite: any) => favorite.id !== id,
+      );
+      await storage.setArrayAsync('favorites', filteredFavorites);
+    }
+  };
+
+  return isLoading || refreshing ? (
     <View style={styles.centeredContainer}>
       <Spinner size={'small'} />
     </View>
@@ -72,7 +82,6 @@ const Home = () => {
     </View>
   ) : (
     <ScrollView
-      scrollEventThrottle={16}
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
@@ -85,19 +94,16 @@ const Home = () => {
         <Text style={styles.subHeading}>{determineTimeOfDay()}</Text>
         <Heading style={styles.heading}>Reflect on this</Heading>
       </View>
-      <View
-        style={[styles.quoteBox, isFullScreen ? styles.fullScreen : null]}
-        {...panResponder.panHandlers}
-      >
+      <View style={styles.quoteBox}>
         <QuoteBox
           quote={quote}
-          isFullScreen={isFullScreen}
-          setIsFullScreen={setIsFullScreen}
+          addToFavorites={addToFavorites}
+          removeFromFavorites={removeFromFavorites}
         />
       </View>
-      <View style={styles.container}>
+      {/* <View style={styles.container}>
         <BooksSection />
-      </View>
+      </View> */}
     </ScrollView>
   );
 };
