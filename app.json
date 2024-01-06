@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "stoicism",
-    "slug": "stoicism",
+    "name": "stoic: daily quotes",
+    "slug": "stoic-daily-quotes",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -9,24 +9,29 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "black"
     },
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.stoicism"
+      "bundleIdentifier": "com.renatoka.stoicism"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.anonymous.stoicism"
+      "package": "com.renatoka.stoicism"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "f40a3e8d-f664-49ee-8df3-5ff9a4812bc7"
+      }
     }
   }
 }
