@@ -63,12 +63,9 @@ const Favorites = () => {
     <View style={styles.centeredContainer}>
       <Text style={styles.error}>{error.message}</Text>
     </View>
-  ) : favorites.length === 0 ? (
-    <View style={styles.centeredContainer}>
-      <Text style={styles.error}>No favorites yet</Text>
-    </View>
   ) : (
     <ScrollView
+      contentContainerStyle={favorites.length === 0 && styles.centeredContainer}
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
@@ -77,19 +74,27 @@ const Favorites = () => {
         />
       }
     >
-      <View style={styles.container}>
-        <Text style={styles.subHeading}>Favorites</Text>
-        <Heading style={styles.heading}>The ones you love</Heading>
-      </View>
-      {favorites.map((favorite: Quote) => (
-        <View style={styles.quoteView} key={favorite.id}>
-          <QuoteBox
-            key={favorite.id}
-            quote={favorite}
-            removeFromFavorites={removeFromFavorites}
-          />
+      {favorites.length === 0 && !isLoading ? (
+        <View style={styles.centeredContainer}>
+          <Text style={styles.error}>No favorites yet</Text>
         </View>
-      ))}
+      ) : (
+        <>
+          <View style={styles.container}>
+            <Text style={styles.subHeading}>Favorites</Text>
+            <Heading style={styles.heading}>The ones you love</Heading>
+          </View>
+          {favorites.map((favorite: Quote) => (
+            <View style={styles.quoteView} key={favorite.id}>
+              <QuoteBox
+                key={favorite.id}
+                quote={favorite}
+                removeFromFavorites={removeFromFavorites}
+              />
+            </View>
+          ))}
+        </>
+      )}
     </ScrollView>
   );
 };
